@@ -54,7 +54,7 @@ async function carregarReservas() {
   setLoading(true);
 
   try {
-    const res = await fetch(`/api/reservas?data=${data}`, {
+    const res = await fetch(`/api/agenda-reservas?data=${data}`, {
       cache: "no-store",
     });
 
@@ -106,7 +106,7 @@ async function confirmarReserva() {
     horaFim: horarioSelecionado.fim,
   };
 
-  const res = await fetch("/api/reservas", {
+  const res = await fetch("/api/agenda-reservas", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
