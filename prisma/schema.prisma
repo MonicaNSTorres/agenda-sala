@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ReservaSala {
+  id             String   @id @default(cuid())
+  nome          String
+  crm           String?
+  especialidade String?
+  telefone      String
+  email         String
+  data          DateTime
+  horaInicio    String
+  horaFim       String
+  observacao    String?
+  status        String   @default("CONFIRMADA")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([data, horaInicio, horaFim])
+}
+
+model BloqueioSala {
+  id         String   @id @default(cuid())
+  data       DateTime
+  horaInicio String
+  horaFim    String
+  motivo     String?
+  createdAt  DateTime @default(now())
+
+  @@unique([data, horaInicio, horaFim])
+}
