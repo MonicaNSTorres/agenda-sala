@@ -1,26 +1,26 @@
 import nodemailer from "nodemailer";
 
 type ReservaEmail = {
-  nome: string;
-  telefone: string;
-  email: string;
-  data: string;
-  horaInicio: string;
-  horaFim: string;
-  crm?: string | null;
-  especialidade?: string | null;
-  observacao?: string | null;
+    nome: string;
+    telefone: string;
+    email: string;
+    data: string;
+    horaInicio: string;
+    horaFim: string;
+    crm?: string | null;
+    especialidade?: string | null;
+    observacao?: string | null;
 };
 
 function valor(v?: string | null) {
-  return v && String(v).trim() ? v : "-";
+    return v && String(v).trim() ? v : "-";
 }
 
 function montarHtmlMedico(reserva: ReservaEmail) {
-  const dataBR = reserva.data.split("-").reverse().join("/");
-  const horario = `${reserva.horaInicio} às ${reserva.horaFim}`;
+    const dataBR = reserva.data.split("-").reverse().join("/");
+    const horario = `${reserva.horaInicio} às ${reserva.horaFim}`;
 
-  return `
+    return `
     <!DOCTYPE html>
     <html lang="pt-BR">
       <body style="margin:0;padding:0;background:#f7f2ee;font-family:Arial,Helvetica,sans-serif;color:#2b211c;">
@@ -41,9 +41,23 @@ function montarHtmlMedico(reserva: ReservaEmail) {
 
                 <tr>
                   <td style="padding:0 36px 36px;">
-                    <div style="width:76px;height:76px;border-radius:999px;background:#ecfdf5;color:#059669;margin:-38px auto 28px;line-height:76px;text-align:center;font-size:34px;font-weight:700;border:6px solid #ffffff;">
-                      ✓
-                    </div>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:-38px;margin-bottom:28px;">
+  <tr>
+    <td align="center">
+      <table cellpadding="0" cellspacing="0">
+        <tr>
+          <td
+            align="center"
+            valign="middle"
+            style="width:76px;height:76px;border-radius:999px;background:#ecfdf5;color:#059669;line-height:76px;text-align:center;font-size:34px;font-weight:700;border:6px solid #ffffff;"
+          >
+            ✓
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 
                     <h1 style="margin:0;text-align:center;font-size:30px;line-height:38px;color:#2b211c;">
                       Reserva confirmada
@@ -111,10 +125,10 @@ function montarHtmlMedico(reserva: ReservaEmail) {
 }
 
 function montarHtmlTauana(reserva: ReservaEmail) {
-  const dataBR = reserva.data.split("-").reverse().join("/");
-  const horario = `${reserva.horaInicio} às ${reserva.horaFim}`;
+    const dataBR = reserva.data.split("-").reverse().join("/");
+    const horario = `${reserva.horaInicio} às ${reserva.horaFim}`;
 
-  return `
+    return `
     <!DOCTYPE html>
     <html lang="pt-BR">
       <body style="margin:0;padding:0;background:#f7f2ee;font-family:Arial,Helvetica,sans-serif;color:#2b211c;">
@@ -194,25 +208,25 @@ function montarHtmlTauana(reserva: ReservaEmail) {
 }
 
 export async function enviarEmailReserva(reserva: ReservaEmail) {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
 
-  await transporter.sendMail({
-    from: `"Agenda Sala | Dra. Tauana Leão" <${process.env.EMAIL_USER}>`,
-    to: reserva.email,
-    subject: "Reserva confirmada • Consultório Dra. Tauana Leão",
-    html: montarHtmlMedico(reserva),
-  });
+    await transporter.sendMail({
+        from: `"Agenda Sala | Dra. Tauana Leão" <${process.env.EMAIL_USER}>`,
+        to: reserva.email,
+        subject: "Reserva confirmada • Consultório Dra. Tauana Leão",
+        html: montarHtmlMedico(reserva),
+    });
 
-  await transporter.sendMail({
-    from: `"Agenda Sala | Dra. Tauana Leão" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_TAUANA,
-    subject: "Nova reserva do consultório",
-    html: montarHtmlTauana(reserva),
-  });
+    await transporter.sendMail({
+        from: `"Agenda Sala | Dra. Tauana Leão" <${process.env.EMAIL_USER}>`,
+        to: process.env.EMAIL_TAUANA,
+        subject: "Nova reserva do consultório",
+        html: montarHtmlTauana(reserva),
+    });
 }
