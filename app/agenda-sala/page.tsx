@@ -50,37 +50,37 @@ export default function AgendaSalaPage() {
     observacao: "",
   });
 
-async function carregarReservas() {
-  setLoading(true);
-
-  try {
-    const res = await fetch(`/api/agenda-reservas?data=${data}`, {
-      cache: "no-store",
-    });
-
-    const text = await res.text();
-
-    let json: any = {};
+  async function carregarReservas() {
+    setLoading(true);
 
     try {
-      json = JSON.parse(text);
-    } catch {
-      console.error("Resposta não era JSON:", text);
-      alert("Erro na API. Veja o console do navegador ou terminal.");
-      return;
-    }
+      const res = await fetch(`/api/agenda-reservas?data=${data}`, {
+        cache: "no-store",
+      });
 
-    if (!res.ok) {
-      alert(json.error || "Erro ao carregar reservas.");
-      return;
-    }
+      const text = await res.text();
 
-    setReservas(json.reservas || []);
-    setBloqueios(json.bloqueios || []);
-  } finally {
-    setLoading(false);
+      let json: any = {};
+
+      try {
+        json = JSON.parse(text);
+      } catch {
+        console.error("Resposta não era JSON:", text);
+        alert("Erro na API. Veja o console do navegador ou terminal.");
+        return;
+      }
+
+      if (!res.ok) {
+        alert(json.error || "Erro ao carregar reservas.");
+        return;
+      }
+
+      setReservas(json.reservas || []);
+      setBloqueios(json.bloqueios || []);
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   useEffect(() => {
     carregarReservas();
@@ -96,55 +96,73 @@ async function carregarReservas() {
     return ocupados.includes(`${inicio}-${fim}`);
   }
 
-async function confirmarReserva() {
-  if (!horarioSelecionado) return;
+  async function confirmarReserva() {
+    if (!horarioSelecionado) return;
 
-  const payload = {
-    ...form,
-    data,
-    horaInicio: horarioSelecionado.inicio,
-    horaFim: horarioSelecionado.fim,
-  };
+    const payload = {
+      ...form,
+      telefone: form.telefone.replace(/\D/g, ""),
+      data,
+      horaInicio: horarioSelecionado.inicio,
+      horaFim: horarioSelecionado.fim,
+    };
+    const res = await fetch("/api/agenda-reservas", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-  const res = await fetch("/api/agenda-reservas", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+    const text = await res.text();
 
-  const text = await res.text();
+    let json: any = {};
 
-  let json: any = {};
+    try {
+      json = JSON.parse(text);
+    } catch {
+      console.error("Resposta não era JSON:", text);
+      alert("Erro na API. Veja o console do navegador ou terminal.");
+      return;
+    }
 
-  try {
-    json = JSON.parse(text);
-  } catch {
-    console.error("Resposta não era JSON:", text);
-    alert("Erro na API. Veja o console do navegador ou terminal.");
-    return;
+    if (!res.ok) {
+      alert(json.error || "Erro ao reservar horário.");
+      return;
+    }
+
+    alert("Reserva realizada com sucesso!");
+
+    setHorarioSelecionado(null);
+    setForm({
+      nome: "",
+      crm: "",
+      especialidade: "",
+      telefone: "",
+      email: "",
+      observacao: "",
+    });
+
+    carregarReservas();
   }
 
-  if (!res.ok) {
-    alert(json.error || "Erro ao reservar horário.");
-    return;
+  function formatarTelefone(valor: string) {
+    const numeros = valor.replace(/\D/g, "").slice(0, 11);
+
+    if (numeros.length <= 2) {
+      return `(${numeros}`;
+    }
+
+    if (numeros.length <= 7) {
+      return `(${numeros.slice(0, 2)}) ${numeros.slice(2)}`;
+    }
+
+    if (numeros.length <= 10) {
+      return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}-${numeros.slice(6)}`;
+    }
+
+    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7, 11)}`;
   }
-
-  alert("Reserva realizada com sucesso!");
-
-  setHorarioSelecionado(null);
-  setForm({
-    nome: "",
-    crm: "",
-    especialidade: "",
-    telefone: "",
-    email: "",
-    observacao: "",
-  });
-
-  carregarReservas();
-}
 
   return (
     <main className="min-h-screen bg-[#F8F3EF] px-4 py-8 text-stone-900">
@@ -289,10 +307,14 @@ async function confirmarReserva() {
               />
 
               <input
+                type="tel"
                 placeholder="Telefone *"
                 value={form.telefone}
                 onChange={(e) =>
-                  setForm({ ...form, telefone: e.target.value })
+                  setForm({
+                    ...form,
+                    telefone: formatarTelefone(e.target.value),
+                  })
                 }
                 className="rounded-2xl border border-stone-200 px-4 py-3 outline-none focus:border-stone-400"
               />

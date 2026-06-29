@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agenda Sala",
+  title: "Agenda de Consultório",
   description: "Reserve seu dia e horário",
 };
 
