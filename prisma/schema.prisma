@@ -19,7 +19,7 @@ model ReservaSala {
   especialidade String?
   telefone      String
   email         String
-  data          DateTime
+  data          String
   horaInicio    String
   horaFim       String
   observacao    String?
@@ -32,7 +32,7 @@ model ReservaSala {
 
 model BloqueioSala {
   id         String   @id @default(cuid())
-  data       DateTime
+  data       String
   horaInicio String
   horaFim    String
   motivo     String?
