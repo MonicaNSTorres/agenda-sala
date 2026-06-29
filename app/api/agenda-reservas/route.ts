@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { enviarEmailReserva } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -110,38 +111,50 @@ export async function POST(req: NextRequest) {
     const id = randomUUID();
 
     const reserva: any[] = await prisma.$queryRaw`
-      INSERT INTO "ReservaSala" (
-        "id",
-        "nome",
-        "crm",
-        "especialidade",
-        "telefone",
-        "email",
-        "data",
-        "horaInicio",
-        "horaFim",
-        "observacao",
-        "status",
-        "createdAt",
-        "updatedAt"
-      )
-      VALUES (
-        ${id},
-        ${nome},
-        ${crm || null},
-        ${especialidade || null},
-        ${telefone},
-        ${email},
-        ${data},
-        ${horaInicio},
-        ${horaFim},
-        ${observacao || null},
-        'CONFIRMADA',
-        NOW(),
-        NOW()
-      )
-      RETURNING *
-    `;
+  INSERT INTO "ReservaSala" (
+    "id",
+    "nome",
+    "crm",
+    "especialidade",
+    "telefone",
+    "email",
+    "data",
+    "horaInicio",
+    "horaFim",
+    "observacao",
+    "status",
+    "createdAt",
+    "updatedAt"
+  )
+  VALUES (
+    ${id},
+    ${nome},
+    ${crm || null},
+    ${especialidade || null},
+    ${telefone},
+    ${email},
+    ${data},
+    ${horaInicio},
+    ${horaFim},
+    ${observacao || null},
+    'CONFIRMADA',
+    NOW(),
+    NOW()
+  )
+  RETURNING *
+`;
+
+    await enviarEmailReserva({
+      nome,
+      crm: crm || null,
+      especialidade: especialidade || null,
+      telefone,
+      email,
+      data,
+      horaInicio,
+      horaFim,
+      observacao: observacao || null,
+    });
 
     return NextResponse.json({
       message: "Reserva criada com sucesso.",
